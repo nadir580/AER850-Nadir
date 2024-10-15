@@ -6,22 +6,26 @@ from sklearn.model_selection import StratifiedShuffleSplit
 import seaborn as sns
 import matplotlib.pyplot as plt
 
+#RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import GridSearchCV
+
 
 #Step 1
 df = pd.read_csv('Project_1_Data.csv')
-print(df.info())
+# print(df.info())
 
-# #Step 2
-# my_splitter = StratifiedShuffleSplit(n_splits = 1, test_size = 0.2, random_state = 775)
-# for train_index, test_index in my_splitter.split(df, df["Step"]):
-#     strat_df_train = df.loc[train_index].reset_index(drop=True)
-#     strat_df_test = df.loc[test_index].reset_index(drop=True)
+#Step 2
+my_splitter = StratifiedShuffleSplit(n_splits = 1, test_size = 0.2, random_state = 775)
+for train_index, test_index in my_splitter.split(df, df["Step"]):
+    strat_df_train = df.loc[train_index].reset_index(drop=True)
+    strat_df_test = df.loc[test_index].reset_index(drop=True)
     
-# X_train = strat_df_train.drop("Step", axis = 1)
-# y_train = strat_df_train["Step"]
+X_train = strat_df_train.drop("Step", axis = 1)
+y_train = strat_df_train["Step"]
 
-# X_test = strat_df_test.drop("Step", axis = 1)
-# y_test = strat_df_test["Step"]
+X_test = strat_df_test.drop("Step", axis = 1)
+y_test = strat_df_test["Step"]
 
 # #Histogram
 # fig, axes = plt.subplots(2, 2, figsize=(10, 8))  
@@ -69,16 +73,32 @@ print(df.info())
 # cbar.set_label('Step')
 # plt.show()
 
-#Step 3
+# #Step 3
+# corr_matrix = df.corr(method='pearson')
+# sns.heatmap(corr_matrix)
+# plt.title('Correlation Matrix X, Y, Z, Step')
+# plt.show()
 
-corr_matrix = df.corr(method='pearson')
-sns.heatmap(corr_matrix)
-plt.title('Correlation Matrix X, Y, Z, Step')
+# corr_matrix = df.drop('Step', axis=1).corr(method='pearson')
+# sns.heatmap(corr_matrix)
+# plt.title('Correlation Matrix X, Y, Z)')
+# plt.show()
 
+#Step 4
 
-plt.show()
+#RandomForestClassifier 
+rf_model = RandomForestClassifier(random_state=45)
 
-corr_matrix = df.drop('Step', axis=1).corr(method='pearson')
-sns.heatmap(corr_matrix)
-plt.title('Correlation Matrix X, Y, Z)')
-plt.show()
+param_grid_rf = {
+    'n_estimators': [150, 250, 350],
+    'max_depth': [15, 25, 35],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [3, 4]
+}
+
+grid_rf = GridSearchCV(rf_model, param_grid_rf, cv=5, scoring='accuracy')
+grid_rf.fit(X_train, y_train)
+
+print("Best RFC Parameters:", grid_rf.best_params_)
+print("Best RFC Accuracy:", grid_rf.best_score_)
+
