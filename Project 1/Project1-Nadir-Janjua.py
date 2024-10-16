@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
+#Support Vector Machine
+from sklearn.svm import SVC
+
 
 #Step 1
 df = pd.read_csv('Project_1_Data.csv')
@@ -102,3 +105,21 @@ grid_rf.fit(X_train, y_train)
 print("Best RFC Parameters:", grid_rf.best_params_)
 print("Best RFC Accuracy:", grid_rf.best_score_)
 
+
+#Support Vector Machine
+svm_model = SVC()
+
+param_grid_svm = {
+    'C': [0.01, 0.1, 1, 10, 100],
+    'gamma': [0.001, 0.01, 0.1, 1, 10],
+    'kernel': ['linear', 'rbf', 'poly'],
+    'degree': [2, 3, 4],
+    'coef0': [0.0, 0.1, 0.5]
+}
+
+
+grid_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring='accuracy')
+grid_svm.fit(X_train, y_train)
+
+print("Best SVM Parameters:", grid_svm.best_params_)
+print("Best SVM Accuracy:", grid_svm.best_score_)
