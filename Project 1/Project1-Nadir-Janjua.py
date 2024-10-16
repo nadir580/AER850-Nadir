@@ -13,6 +13,13 @@ from sklearn.model_selection import GridSearchCV
 #Support Vector Machine
 from sklearn.svm import SVC
 
+#Decision Tree
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import RandomizedSearchCV
+from scipy.stats import randint
+
+
+
 
 #Step 1
 df = pd.read_csv('Project_1_Data.csv')
@@ -89,37 +96,55 @@ y_test = strat_df_test["Step"]
 
 #Step 4
 
-#RandomForestClassifier 
-rf_model = RandomForestClassifier(random_state=45)
+# #RandomForestClassifier 
+# rf_model = RandomForestClassifier(random_state=45)
 
-param_grid_rf = {
-    'n_estimators': [150, 250, 350],
-    'max_depth': [15, 25, 35],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [3, 4]
+# param_grid_rf = {
+#     'n_estimators': [150, 250, 350],
+#     'max_depth': [15, 25, 35],
+#     'min_samples_split': [2, 5, 10],
+#     'min_samples_leaf': [3, 4]
+# }
+
+# grid_rf = GridSearchCV(rf_model, param_grid_rf, cv=5, scoring='accuracy')
+# grid_rf.fit(X_train, y_train)
+
+# print("Best RFC Parameters:", grid_rf.best_params_)
+# print("Best RFC Accuracy:", grid_rf.best_score_)
+
+
+# #Support Vector Machine
+# svm_model = SVC()
+
+# param_grid_svm = {
+#     'C': [0.01, 0.1, 1, 10, 100],
+#     'gamma': [0.001, 0.01, 0.1, 1, 10],
+#     'kernel': ['linear', 'rbf', 'poly'],
+#     'degree': [2, 3, 4],
+#     'coef0': [0.0, 0.1, 0.5]
+# }
+
+
+# grid_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring='accuracy')
+# grid_svm.fit(X_train, y_train)
+
+# print("Best SVM Parameters:", grid_svm.best_params_)
+# print("Best SVM Accuracy:", grid_svm.best_score_)
+
+
+#Decision Tree
+dt_model = DecisionTreeClassifier(random_state=42)
+param_dist_dt = {
+    'max_depth': randint(10, 50),          
+    'min_samples_split': randint(2, 20),    
+    'min_samples_leaf': randint(1, 10),     
+    'criterion': ['gini', 'entropy']        
 }
 
-grid_rf = GridSearchCV(rf_model, param_grid_rf, cv=5, scoring='accuracy')
-grid_rf.fit(X_train, y_train)
-
-print("Best RFC Parameters:", grid_rf.best_params_)
-print("Best RFC Accuracy:", grid_rf.best_score_)
+random_search_dt = RandomizedSearchCV(dt_model, param_distributions=param_dist_dt, 
+                                      n_iter=100, cv=5, random_state=42, scoring='accuracy')
+random_search_dt.fit(X_train, y_train)
 
 
-#Support Vector Machine
-svm_model = SVC()
-
-param_grid_svm = {
-    'C': [0.01, 0.1, 1, 10, 100],
-    'gamma': [0.001, 0.01, 0.1, 1, 10],
-    'kernel': ['linear', 'rbf', 'poly'],
-    'degree': [2, 3, 4],
-    'coef0': [0.0, 0.1, 0.5]
-}
-
-
-grid_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring='accuracy')
-grid_svm.fit(X_train, y_train)
-
-print("Best SVM Parameters:", grid_svm.best_params_)
-print("Best SVM Accuracy:", grid_svm.best_score_)
+print("Decision Tree Parameters:", random_search_dt.best_params_)
+print("Decision Tree Accuracy:", random_search_dt.best_score_)
