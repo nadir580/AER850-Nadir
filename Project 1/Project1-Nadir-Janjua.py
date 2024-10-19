@@ -20,6 +20,11 @@ from scipy.stats import randint
 #Performance Evaluation
 from sklearn.metrics import precision_score, accuracy_score, f1_score, confusion_matrix
 
+#Stacked Model
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import StackingClassifier
+from sklearn.linear_model import LogisticRegression
+
 #Step 1
 df = pd.read_csv('Project_1_Data.csv')
 # print(df.info())
@@ -183,3 +188,43 @@ plt.title('Confusion Matrix of Random Forest Classifier')
 plt.xlabel('Predicted')
 plt.ylabel('Actual')
 plt.show()
+
+#Step 6
+
+scaler = StandardScaler()
+
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+estimators = [
+    ('rf', grid_rf.best_estimator_),
+    ('svm', grid_svm.best_estimator_)
+]
+
+stacked_model = StackingClassifier(
+    estimators=estimators,
+    final_estimator=LogisticRegression(max_iter=1000)
+)
+
+stacked_model.fit(X_train_scaled, y_train)
+
+y_pred_stacked = stacked_model.predict(X_test_scaled)
+
+accuracy_stacked = accuracy_score(y_test, y_pred_stacked)
+precision_stacked = precision_score(y_test, y_pred_stacked, average='weighted')
+f1_stacked = f1_score(y_test, y_pred_stacked, average='weighted')
+
+print(f"\nStacked Model Performance:")
+print(f"Accuracy: {accuracy_stacked:.4f}")
+print(f"Precision: {precision_stacked:.4f}")
+print(f"F1-Score: {f1_stacked:.4f}")
+
+conf_matrix_stacked = confusion_matrix(y_test, y_pred_stacked)
+plt.figure()
+sns.heatmap(conf_matrix_stacked, annot=True, fmt="d", cmap='Blues', cbar=False)
+plt.title('Confusion Matrix Stacked Model of RF & SVM')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
+
+
