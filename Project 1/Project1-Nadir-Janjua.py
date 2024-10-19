@@ -25,11 +25,17 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import StackingClassifier
 from sklearn.linear_model import LogisticRegression
 
+#Model Evaluation
+
+
+
 #Step 1
+
 df = pd.read_csv('Project_1_Data.csv')
 # print(df.info())
 
 #Step 2
+
 my_splitter = StratifiedShuffleSplit(n_splits = 1, test_size = 0.2, random_state = 775)
 for train_index, test_index in my_splitter.split(df, df["Step"]):
     strat_df_train = df.loc[train_index].reset_index(drop=True)
@@ -88,6 +94,7 @@ y_test = strat_df_test["Step"]
 # plt.show()
 
 # #Step 3
+
 # corr_matrix = df.corr(method='pearson')
 # sns.heatmap(corr_matrix)
 # plt.title('Correlation Matrix X, Y, Z, Step')
@@ -226,5 +233,27 @@ plt.title('Confusion Matrix Stacked Model of RF & SVM')
 plt.xlabel('Predicted')
 plt.ylabel('Actual')
 plt.show()
+
+
+#Step 7
+
+
+import joblib
+model_filename = '/Users/nadir580/Documents/GitHub/AER850-/Project 1/stacked_model.joblib'
+loaded_model = joblib.load(model_filename)
+
+new_data = np.array([
+    [9.375, 3.0625, 1.51],
+    [6.995, 5.125, 0.3875],
+    [0, 3.0625, 1.93],
+    [9.4, 3, 1.8],
+    [9.4, 3, 1.3]
+])
+
+predicted_steps = loaded_model.predict(new_data)
+
+print("Predicted Maintenance Steps for New Coordinates:", predicted_steps)
+
+
 
 
