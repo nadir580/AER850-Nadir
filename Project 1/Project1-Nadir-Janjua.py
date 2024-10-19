@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 import seaborn as sns
-import matplotlib.pyplot as plt
 
 #RandomForestClassifier
 from sklearn.ensemble import RandomForestClassifier
@@ -18,8 +17,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import RandomizedSearchCV
 from scipy.stats import randint
 
-
-
+#Performance Evaluation
+from sklearn.metrics import precision_score, accuracy_score, f1_score, confusion_matrix
 
 #Step 1
 df = pd.read_csv('Project_1_Data.csv')
@@ -96,40 +95,40 @@ y_test = strat_df_test["Step"]
 
 #Step 4
 
-# #RandomForestClassifier 
-# rf_model = RandomForestClassifier(random_state=45)
+#RandomForestClassifier 
+rf_model = RandomForestClassifier(random_state=45)
 
-# param_grid_rf = {
-#     'n_estimators': [150, 250, 350],
-#     'max_depth': [15, 25, 35],
-#     'min_samples_split': [2, 5, 10],
-#     'min_samples_leaf': [3, 4]
-# }
+param_grid_rf = {
+    'n_estimators': [150, 250, 350],
+    'max_depth': [15, 25, 35],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [3, 4]
+}
 
-# grid_rf = GridSearchCV(rf_model, param_grid_rf, cv=5, scoring='accuracy')
-# grid_rf.fit(X_train, y_train)
+grid_rf = GridSearchCV(rf_model, param_grid_rf, cv=5, scoring='accuracy')
+grid_rf.fit(X_train, y_train)
 
-# print("Best RFC Parameters:", grid_rf.best_params_)
-# print("Best RFC Accuracy:", grid_rf.best_score_)
-
-
-# #Support Vector Machine
-# svm_model = SVC()
-
-# param_grid_svm = {
-#     'C': [0.01, 0.1, 1, 10, 100],
-#     'gamma': [0.001, 0.01, 0.1, 1, 10],
-#     'kernel': ['linear', 'rbf', 'poly'],
-#     'degree': [2, 3, 4],
-#     'coef0': [0.0, 0.1, 0.5]
-# }
+print("Best RFC Parameters:", grid_rf.best_params_)
+print("Best RFC Accuracy:", grid_rf.best_score_)
 
 
-# grid_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring='accuracy')
-# grid_svm.fit(X_train, y_train)
+#Support Vector Machine
+svm_model = SVC()
 
-# print("Best SVM Parameters:", grid_svm.best_params_)
-# print("Best SVM Accuracy:", grid_svm.best_score_)
+param_grid_svm = {
+    'C': [0.01, 0.1, 1, 10, 100],
+    'gamma': [0.001, 0.01, 0.1, 1, 10],
+    'kernel': ['linear', 'rbf', 'poly'],
+    'degree': [2, 3, 4],
+    'coef0': [0.0, 0.1, 0.5]
+}
+
+
+grid_svm = GridSearchCV(svm_model, param_grid_svm, cv=5, scoring='accuracy')
+grid_svm.fit(X_train, y_train)
+
+print("\nBest SVM Parameters:", grid_svm.best_params_)
+print("Best SVM Accuracy:", grid_svm.best_score_)
 
 
 #Decision Tree
@@ -146,5 +145,41 @@ random_search_dt = RandomizedSearchCV(dt_model, param_distributions=param_dist_d
 random_search_dt.fit(X_train, y_train)
 
 
-print("Decision Tree Parameters:", random_search_dt.best_params_)
+print("\nDecision Tree Parameters:", random_search_dt.best_params_)
 print("Decision Tree Accuracy:", random_search_dt.best_score_)
+
+#Step 5
+
+def evaluate_model_performance(model, X_test, y_test):
+    y_pred = model.predict(X_test)
+    
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, average='weighted')
+    f1 = f1_score(y_test, y_pred, average='weighted')
+    
+    print(f"Accuracy: {accuracy:.4f}")
+    print(f"Precision: {precision:.4f}")
+    print(f"F1-Score: {f1:.4f}")
+    
+    return y_pred
+
+
+print("\nRandom Forest Classifier Performance:")
+y_pred_rf = evaluate_model_performance(grid_rf, X_test, y_test)
+
+
+print("\nSupport Vector Machine Performance:")
+y_pred_svm = evaluate_model_performance(grid_svm, X_test, y_test)
+
+
+print("\nDecision Tree Classifier Performance:")
+y_pred_dt = evaluate_model_performance(random_search_dt, X_test, y_test)
+
+conf_matrix = confusion_matrix(y_test, y_pred_rf)
+
+plt.figure()
+sns.heatmap(conf_matrix, annot=True, fmt="d", cmap='Blues', cbar=False)
+plt.title('Confusion Matrix of Random Forest Classifier')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.show()
